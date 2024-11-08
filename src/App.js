@@ -12,15 +12,25 @@ const initializeDatabase = async () => {
   try {
     const stored = await localforage.getItem('initialized');
     if (!stored) {
-      // Завантажуємо дані з merged.json динамічно
-      const response = await fetch('public/merged.json');
-      const jsonData = await response.json();
+      const numParts = 4; // Кількість частин
+      for (let i = 1; i <= numParts; i++) {
+        const response = await fetch(`${process.env.PUBLIC_URL}/part${i}.json`);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const jsonData = await response.json();
 
-      for (const item of jsonData) {
-        await localforage.setItem(item.word.toLowerCase(), item);
+        // Зберігаємо записи з цієї частини в IndexedDB
+        const entries = Object.entries(jsonData);
+        for (const [key, value] of entries) {
+          await localforage.setItem(key.toLowerCase(), value);
+        }
+
+        console.log(`Частина ${i} завантажена та збережена в IndexedDB`);
       }
+
       await localforage.setItem('initialized', true);
-      console.log('Дані з JSON успішно збережено у IndexedDB');
+      console.log('Усі частини завантажені та дані збережені в IndexedDB');
     }
   } catch (error) {
     console.error('Помилка ініціалізації бази даних:', error);
