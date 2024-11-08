@@ -13,7 +13,7 @@ const initializeDatabase = async () => {
     const stored = await localforage.getItem('initialized');
     if (!stored) {
       // Завантажуємо дані з merged.json динамічно
-      const response = await fetch('/merged.json');
+      const response = await fetch('public/merged.json');
       const jsonData = await response.json();
 
       for (const item of jsonData) {
