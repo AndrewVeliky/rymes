@@ -3,7 +3,6 @@ import React, { useEffect, useState } from 'react';
 import localforage from 'localforage';
 import RhymeSearchPage from './pages/RhymeSearchPage';
 import AddRhymePage from './pages/AddRhymePage';
-import jsonData from './merged.json';
 
 // Імпорт компонентів з Material-UI
 import { AppBar, Toolbar, Button, Container } from '@mui/material';
@@ -13,7 +12,11 @@ const initializeDatabase = async () => {
   try {
     const stored = await localforage.getItem('initialized');
     if (!stored) {
-      for (const [index, item] of Object.entries(jsonData)) {
+      // Завантажуємо дані з merged.json динамічно
+      const response = await fetch('/merged.json');
+      const jsonData = await response.json();
+
+      for (const item of jsonData) {
         await localforage.setItem(item.word.toLowerCase(), item);
       }
       await localforage.setItem('initialized', true);
